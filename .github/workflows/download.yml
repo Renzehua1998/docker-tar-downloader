@@ -1,15 +1,20 @@
-name: Download Docker Image Tar
+name: Download Docker Image Tar (ARM64)
 on: workflow_dispatch
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Pull and Save Image
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Pull and Save ARM64 Image
         run: |
-          docker pull kubeedge/iptables-manager:v1.17.2
-          docker save -o iptables-manager-v1.17.2.tar kubeedge/iptables-manager:v1.17.2
+          # 明确指定拉取 arm64 架构镜像
+          docker pull --platform linux/arm64 kubeedge/iptables-manager:v1.17.2
+          docker save -o iptables-manager-v1.17.2-arm64.tar kubeedge/iptables-manager:v1.17.2
+
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: iptables-manager-tar
-          path: iptables-manager-v1.17.2.tar
+          name: iptables-manager-v1.17.2-arm64
+          path: iptables-manager-v1.17.2-arm64.tar
