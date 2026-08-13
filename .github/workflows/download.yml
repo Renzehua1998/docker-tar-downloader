@@ -1,5 +1,6 @@
-name: Download Docker Image Tar (ARM64)
+name: Download Golang 1.19 ARM64 Image Tar
 on: workflow_dispatch
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -9,12 +10,12 @@ jobs:
 
       - name: Pull and Save ARM64 Image
         run: |
-          # 明确指定拉取 arm64 架构镜像
-          docker pull --platform linux/arm64 kubeedge/iptables-manager:v1.17.2
-          docker save -o iptables-manager-v1.17.2-arm64.tar kubeedge/iptables-manager:v1.17.2
+          # 明确指定拉取 arm64 架构的 golang:1.19 镜像
+          docker pull --platform linux/arm64 golang:1.19
+          docker save -o golang-1.19-arm64.tar golang:1.19
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: iptables-manager-v1.17.2-arm64
-          path: iptables-manager-v1.17.2-arm64.tar
+          name: golang-1.19-arm64
+          path: golang-1.19-arm64.tar
