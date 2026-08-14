@@ -1,12 +1,25 @@
 name: Download Kthena v1.0.0 ARM64 Images Tar
 on: workflow_dispatch
 
+# 赋予读取 packages 的权限
+permissions:
+  contents: read
+  packages: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
+
+      # 自动登录到 GitHub Container Registry (ghcr.io)
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Pull and Save ARM64 Images
         run: |
