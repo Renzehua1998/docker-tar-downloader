@@ -1,7 +1,6 @@
 name: Download Kthena v1.0.0 ARM64 Images Tar
 on: workflow_dispatch
 
-# 赋予读取 packages 的权限
 permissions:
   contents: read
   packages: read
@@ -13,7 +12,6 @@ jobs:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
-      # 自动登录到 GitHub Container Registry (ghcr.io)
       - name: Log in to GHCR
         uses: docker/login-action@v3
         with:
@@ -21,16 +19,18 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Pull and Save ARM64 Images
+      - name: Pull and Save Images
         run: |
-          # 1. 明确指定 arm64 架构拉取 2 个 Kthena 镜像
-          docker pull --platform linux/arm64 ghcr.io/volcano-sh/kthena-controller:v1.0.0
-          docker pull --platform linux/arm64 ghcr.io/volcano-sh/kthena-router:v1.0.0
+          # 定义镜像列表
+          IMG_CONTROLLER="ghcr.io/volcano-sh/kthena-controller:v1.0.0"
+          IMG_ROUTER="ghcr.io/volcano-sh/kthena-router:v1.0.0"
 
-          # 2. 将 2 个镜像打包到同一个 tar 文件中
-          docker save -o kthena-v1.0.0-arm64.tar \
-            ghcr.io/volcano-sh/kthena-controller:v1.0.0 \
-            ghcr.io/volcano-sh/kthena-router:v1.0.0
+          # 尝试以 arm64 拉取；若无 arm64 manifest 则回退至默认拉取
+          docker pull --platform linux/arm64 $IMG_CONTROLLER || docker pull $IMG_CONTROLLER
+          docker pull --platform linux/arm64 $IMG_ROUTER || docker pull $IMG_ROUTER
+
+          # 打包镜像
+          docker save -o kthena-v1.0.0-arm64.tar $IMG_CONTROLLER $IMG_ROUTER
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
