@@ -1,4 +1,4 @@
-name: Download Kthena v1.0.0 ARM64 Images Tar (via DaoCloud Proxy)
+name: Download Python 3.11 Alpine ARM64 Image Tar
 on: workflow_dispatch
 
 jobs:
@@ -8,30 +8,14 @@ jobs:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
-      - name: Pull, Tag and Save ARM64 Images
+      - name: Pull and Save ARM64 Image
         run: |
-          # 1. 声明正确的代理与原始镜像变量
-          PROXY_CONTROLLER="m.daocloud.io/ghcr.io/volcano-sh/kthena-controller-manager:v1.0.0"
-          PROXY_ROUTER="m.daocloud.io/ghcr.io/volcano-sh/kthena-router:v1.0.0"
-
-          ORIG_CONTROLLER="ghcr.io/volcano-sh/kthena-controller-manager:v1.0.0"
-          ORIG_ROUTER="ghcr.io/volcano-sh/kthena-router:v1.0.0"
-
-          # 2. 从 DaoCloud 代理拉取 ARM64 架构镜像
-          docker pull --platform linux/arm64 $PROXY_CONTROLLER
-          docker pull --platform linux/arm64 $PROXY_ROUTER
-
-          # 3. 重新打上原始官方 Tag（方便导入服务器后直接供 K8s 部署使用）
-          docker tag $PROXY_CONTROLLER $ORIG_CONTROLLER
-          docker tag $PROXY_ROUTER $ORIG_ROUTER
-
-          # 4. 打包两种 Tag 镜像
-          docker save -o kthena-v1.0.0-arm64.tar \
-            $PROXY_CONTROLLER $PROXY_ROUTER \
-            $ORIG_CONTROLLER $ORIG_ROUTER
+          # 明确指定拉取 arm64 架构的 python:3.11-alpine 镜像
+          docker pull --platform linux/arm64 python:3.11-alpine
+          docker save -o python-3.11-alpine-arm64.tar python:3.11-alpine
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: kthena-v1.0.0-arm64
-          path: kthena-v1.0.0-arm64.tar
+          name: python-3.11-alpine-arm64
+          path: python-3.11-alpine-arm64.tar
