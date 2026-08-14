@@ -1,4 +1,4 @@
-name: Download Volcano v1.14.0 ARM64 Images Tar
+name: Download Kthena v1.0.0 ARM64 Images Tar
 on: workflow_dispatch
 
 jobs:
@@ -10,19 +10,17 @@ jobs:
 
       - name: Pull and Save ARM64 Images
         run: |
-          # 1. 明确指定 arm64 架构拉取 3 个 Volcano 镜像
-          docker pull --platform linux/arm64 volcanosh/vc-webhook-manager:v1.14.0
-          docker pull --platform linux/arm64 volcanosh/vc-controller-manager:v1.14.0
-          docker pull --platform linux/arm64 volcanosh/vc-scheduler:v1.14.0
+          # 1. 明确指定 arm64 架构拉取 2 个 Kthena 镜像
+          docker pull --platform linux/arm64 ghcr.io/volcano-sh/kthena-controller:v1.0.0
+          docker pull --platform linux/arm64 ghcr.io/volcano-sh/kthena-router:v1.0.0
 
-          # 2. 将 3 个镜像打包到同一个 tar 文件中
-          docker save -o volcano-v1.14.0-arm64.tar \
-            volcanosh/vc-webhook-manager:v1.14.0 \
-            volcanosh/vc-controller-manager:v1.14.0 \
-            volcanosh/vc-scheduler:v1.14.0
+          # 2. 将 2 个镜像打包到同一个 tar 文件中
+          docker save -o kthena-v1.0.0-arm64.tar \
+            ghcr.io/volcano-sh/kthena-controller:v1.0.0 \
+            ghcr.io/volcano-sh/kthena-router:v1.0.0
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: volcano-v1.14.0-arm64
-          path: volcano-v1.14.0-arm64.tar
+          name: kthena-v1.0.0-arm64
+          path: kthena-v1.0.0-arm64.tar
