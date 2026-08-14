@@ -1,4 +1,4 @@
-name: Download Golang 1.19 ARM64 Image Tar
+name: Download Volcano v1.14.0 ARM64 Images Tar
 on: workflow_dispatch
 
 jobs:
@@ -8,14 +8,21 @@ jobs:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
-      - name: Pull and Save ARM64 Image
+      - name: Pull and Save ARM64 Images
         run: |
-          # 明确指定拉取 arm64 架构的 golang:1.19 镜像
-          docker pull --platform linux/arm64 golang:1.19
-          docker save -o golang-1.19-arm64.tar golang:1.19
+          # 1. 明确指定 arm64 架构拉取 3 个 Volcano 镜像
+          docker pull --platform linux/arm64 volcanosh/vc-webhook-manager:v1.14.0
+          docker pull --platform linux/arm64 volcanosh/vc-controller-manager:v1.14.0
+          docker pull --platform linux/arm64 volcanosh/vc-scheduler:v1.14.0
+
+          # 2. 将 3 个镜像打包到同一个 tar 文件中
+          docker save -o volcano-v1.14.0-arm64.tar \
+            volcanosh/vc-webhook-manager:v1.14.0 \
+            volcanosh/vc-controller-manager:v1.14.0 \
+            volcanosh/vc-scheduler:v1.14.0
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: golang-1.19-arm64
-          path: golang-1.19-arm64.tar
+          name: volcano-v1.14.0-arm64
+          path: volcano-v1.14.0-arm64.tar
