@@ -10,22 +10,22 @@ jobs:
 
       - name: Pull, Tag and Save ARM64 Images
         run: |
-          # 1. 定义代理与原始镜像变量
-          PROXY_CONTROLLER="m.daocloud.io/ghcr.io/volcano-sh/kthena-controller:v1.0.0"
+          # 1. 声明正确的代理与原始镜像变量
+          PROXY_CONTROLLER="m.daocloud.io/ghcr.io/volcano-sh/kthena-controller-manager:v1.0.0"
           PROXY_ROUTER="m.daocloud.io/ghcr.io/volcano-sh/kthena-router:v1.0.0"
 
-          ORIG_CONTROLLER="ghcr.io/volcano-sh/kthena-controller:v1.0.0"
+          ORIG_CONTROLLER="ghcr.io/volcano-sh/kthena-controller-manager:v1.0.0"
           ORIG_ROUTER="ghcr.io/volcano-sh/kthena-router:v1.0.0"
 
-          # 2. 从 DaoCloud 镜像代理处指定拉取 arm64 架构
+          # 2. 从 DaoCloud 代理拉取 ARM64 架构镜像
           docker pull --platform linux/arm64 $PROXY_CONTROLLER
           docker pull --platform linux/arm64 $PROXY_ROUTER
 
-          # 3. 重新打上原始官方 Tag（方便导入服务器后直接给 K8s 使用）
+          # 3. 重新打上原始官方 Tag（方便导入服务器后直接供 K8s 部署使用）
           docker tag $PROXY_CONTROLLER $ORIG_CONTROLLER
           docker tag $PROXY_ROUTER $ORIG_ROUTER
 
-          # 4. 将两种 Tag 均打包进同一个 tar 包中
+          # 4. 打包两种 Tag 镜像
           docker save -o kthena-v1.0.0-arm64.tar \
             $PROXY_CONTROLLER $PROXY_ROUTER \
             $ORIG_CONTROLLER $ORIG_ROUTER
