@@ -1,9 +1,5 @@
-name: Download Kthena v1.0.0 ARM64 Images Tar
+name: Download Kthena v1.0.0 ARM64 Images Tar (via DaoCloud Proxy)
 on: workflow_dispatch
-
-permissions:
-  contents: read
-  packages: read
 
 jobs:
   build:
@@ -12,25 +8,27 @@ jobs:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
-      - name: Log in to GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Pull and Save Images
+      - name: Pull, Tag and Save ARM64 Images
         run: |
-          # 定义镜像列表
-          IMG_CONTROLLER="ghcr.io/volcano-sh/kthena-controller:v1.0.0"
-          IMG_ROUTER="ghcr.io/volcano-sh/kthena-router:v1.0.0"
+          # 1. 定义代理与原始镜像变量
+          PROXY_CONTROLLER="m.daocloud.io/ghcr.io/volcano-sh/kthena-controller:v1.0.0"
+          PROXY_ROUTER="m.daocloud.io/ghcr.io/volcano-sh/kthena-router:v1.0.0"
 
-          # 尝试以 arm64 拉取；若无 arm64 manifest 则回退至默认拉取
-          docker pull --platform linux/arm64 $IMG_CONTROLLER || docker pull $IMG_CONTROLLER
-          docker pull --platform linux/arm64 $IMG_ROUTER || docker pull $IMG_ROUTER
+          ORIG_CONTROLLER="ghcr.io/volcano-sh/kthena-controller:v1.0.0"
+          ORIG_ROUTER="ghcr.io/volcano-sh/kthena-router:v1.0.0"
 
-          # 打包镜像
-          docker save -o kthena-v1.0.0-arm64.tar $IMG_CONTROLLER $IMG_ROUTER
+          # 2. 从 DaoCloud 镜像代理处指定拉取 arm64 架构
+          docker pull --platform linux/arm64 $PROXY_CONTROLLER
+          docker pull --platform linux/arm64 $PROXY_ROUTER
+
+          # 3. 重新打上原始官方 Tag（方便导入服务器后直接给 K8s 使用）
+          docker tag $PROXY_CONTROLLER $ORIG_CONTROLLER
+          docker tag $PROXY_ROUTER $ORIG_ROUTER
+
+          # 4. 将两种 Tag 均打包进同一个 tar 包中
+          docker save -o kthena-v1.0.0-arm64.tar \
+            $PROXY_CONTROLLER $PROXY_ROUTER \
+            $ORIG_CONTROLLER $ORIG_ROUTER
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
